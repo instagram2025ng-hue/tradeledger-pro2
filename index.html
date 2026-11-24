@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1424"><title>TradeLedger Pro — Trading Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand auth-brand"><div class="brand-mark">T</div><div><b>TradeLedger Pro</b><small>YOUR TRADING JOURNAL</small></div></div>
+    <div class="eyebrow">PRIVATE WORKSPACE</div><h1 id="authTitle">তোমার জার্নালে প্রবেশ করো</h1>
+    <p class="muted">নিজের Paper Trading অনুশীলন নিরাপদে সংরক্ষণ করো।</p>
+    <form id="authForm">
+      <label>ইমেইল<input id="authEmail" type="email" autocomplete="email" required placeholder="name@example.com"></label>
+      <label>পাসওয়ার্ড<input id="authPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="কমপক্ষে ৮ অক্ষর"></label>
+      <button class="primary wide" id="authSubmit">লগইন</button>
+    </form>
+    <div class="auth-links"><button id="toggleAuth" class="link-btn">নতুন অ্যাকাউন্ট তৈরি করো</button><button id="resetPassword" class="link-btn">পাসওয়ার্ড ভুলে গেছ?</button></div>
+    <p id="authMessage" class="message"></p>
+    <div class="config-warning" id="configWarning">প্রথমে config.js ফাইলে Supabase URL ও anon key বসাতে হবে।</div>
+  </div>
+</div>
+
+<div id="appShell" class="shell hidden">
+<aside class="sidebar">
+ <div class="brand"><div class="brand-mark">T</div><div><b>TradeLedger Pro</b><small>TRADING JOURNAL</small></div></div>
+ <div class="nav-label">WORKSPACE</div>
+ <button class="nav active" data-page="dashboard">▦ <span>ড্যাশবোর্ড</span></button>
+ <button class="nav" data-page="trades">↗ <span>ট্রেড লগ</span></button>
+ <button class="nav" data-page="calendar">▦ <span>ট্রেড ক্যালেন্ডার</span></button>
+ <button class="nav" data-page="strategies">⌁ <span>স্ট্র্যাটেজি</span></button>
+ <button class="nav" data-page="reports">▤ <span>মাসিক রিপোর্ট</span></button>
+ <button class="nav" data-page="risk">◈ <span>রিস্ক ক্যালকুলেটর</span></button>
+ <button class="nav" data-page="journal">✎ <span>দৈনিক জার্নাল</span></button>
+ <div class="sidebar-bottom"><div class="dot"></div><div><b>Private account</b><small>তোমার নিজের ডেটা</small></div></div>
+</aside>
+<main class="main">
+<header class="topbar"><div><div class="eyebrow">PERSONAL WORKSPACE</div><h1 id="pageTitle">ড্যাশবোর্ড</h1></div><div class="top-actions"><button id="themeToggle" class="icon-btn" title="থিম পরিবর্তন">☼</button><span class="user-email" id="userEmail"></span><button class="secondary small-btn" id="logoutBtn">লগআউট</button><button class="primary" id="newTradeBtn">＋ নতুন ট্রেড</button></div></header>
+
+<section class="page active" id="dashboard">
+ <div class="hero"><div><div class="eyebrow">PAPER TRADING OVERVIEW</div><h2>স্বাগতম তোমার ওয়ার্কস্পেসে।</h2><p>ফলাফলের পাশাপাশি নিয়ম, ধারাবাহিকতা ও শেখার অগ্রগতি পর্যালোচনা করো।</p></div><div class="hero-symbol">↗</div></div>
+ <div class="stats">
+  <article class="stat"><span>মোট ট্রেড</span><strong id="statTrades">0</strong><small>লগ করা অনুশীলন</small></article>
+  <article class="stat"><span>Win Rate</span><strong id="statWin">0%</strong><small>জয়ী ট্রেডের হার</small></article>
+  <article class="stat"><span>Net P/L</span><strong id="statPL">0.00</strong><small>সিমুলেটেড ফলাফল</small></article>
+  <article class="stat"><span>Average R</span><strong id="statR">0.00R</strong><small>গড় R-multiple</small></article>
+ </div>
+ <div class="grid-two">
+  <article class="panel"><div class="panel-head"><div><h3>সাম্প্রতিক ট্রেড</h3><p>সর্বশেষ ৬টি এন্ট্রি</p></div><button class="link-btn" data-go="trades">সব দেখুন →</button></div><div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>সিম্বল</th><th>দিক</th><th>P/L</th><th>ফল</th></tr></thead><tbody id="recentTrades"><tr><td colspan="5" class="empty">এখনো কোনো ট্রেড নেই।</td></tr></tbody></table></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>দ্রুত পর্যালোচনা</h3><p>প্রতিটি সেশনের পর নিজেকে জিজ্ঞেস করো</p></div></div><ul class="prompt-list"><li>আমি কি আগে থেকে লেখা নিয়ম মেনেছি?</li><li>কোন সিদ্ধান্তটি সবচেয়ে ভালো ছিল?</li><li>কোন ভুলটি বারবার হচ্ছে?</li><li>পরের অনুশীলনে একটি কী উন্নতি করব?</li></ul></article>
+ </div>
+ <div class="notice">শুধু শিক্ষামূলক Paper Trading-এর জন্য। এটি কোনো আর্থিক পরামর্শ, ট্রেডিং সিগন্যাল বা লাভের নিশ্চয়তা নয়।</div>
+</section>
+
+<section class="page" id="trades">
+ <div class="section-head"><div><h2>ট্রেড লগ</h2><p>ট্রেড, ফলাফল ও স্ক্রিনশট সংরক্ষণ করো।</p></div><div class="actions"><button class="secondary" id="csvBtn">↓ CSV Export</button><button class="primary" id="newTradeBtn2">＋ নতুন ট্রেড</button></div></div>
+ <article class="panel"><div class="table-wrap"><table><thead><tr><th>তারিখ</th><th>সিম্বল</th><th>সেটআপ</th><th>দিক</th><th>Entry</th><th>Exit</th><th>P/L</th><th>R</th><th>ফল</th><th>ছবি</th></tr></thead><tbody id="tradeRows"><tr><td colspan="10" class="empty">লোড হচ্ছে...</td></tr></tbody></table></div></article>
+</section>
+
+<section class="page" id="calendar">
+ <div class="section-head"><div><h2>ট্রেড ক্যালেন্ডার</h2><p>কোন দিনে কী ফলাফল হয়েছে, এক নজরে দেখো।</p></div><div class="actions"><button class="secondary" id="prevMonth">←</button><b id="monthLabel"></b><button class="secondary" id="nextMonth">→</button></div></div>
+ <article class="panel"><div class="calendar-grid" id="calendarGrid"></div><div class="legend"><span class="win-dot"></span> লাভের দিন <span class="loss-dot"></span> ক্ষতির দিন <span class="neutral-dot"></span> ট্রেড নেই</div></article>
+</section>
+
+<section class="page" id="strategies">
+ <div class="section-head"><div><h2>স্ট্র্যাটেজি পারফরম্যান্স</h2><p>কোন সেটআপে কী ফল হয়েছে, সেটি তুলনা করো।</p></div></div>
+ <article class="panel"><div class="table-wrap"><table><thead><tr><th>স্ট্র্যাটেজি</th><th>ট্রেড</th><th>Win Rate</th><th>Net P/L</th><th>Average R</th></tr></thead><tbody id="strategyRows"><tr><td colspan="5" class="empty">স্ট্র্যাটেজি যোগ করা ট্রেড নেই।</td></tr></tbody></table></div></article>
+</section>
+
+<section class="page" id="reports">
+ <div class="section-head"><div><h2>মাসিক রিপোর্ট</h2><p>মাস নির্বাচন করে সারাংশ ও ট্রেড তালিকা দেখো।</p></div><input type="month" id="reportMonth" class="month-input"></div>
+ <div class="stats"><article class="stat"><span>মাসের ট্রেড</span><strong id="monthTrades">0</strong></article><article class="stat"><span>Win Rate</span><strong id="monthWin">0%</strong></article><article class="stat"><span>Net P/L</span><strong id="monthPL">0.00</strong></article><article class="stat"><span>Average R</span><strong id="monthR">0.00R</strong></article></div>
+ <article class="panel"><div class="panel-head"><div><h3>মাসের পর্যালোচনা</h3><p>সংখ্যার বাইরে শেখার বিষয় লিখে রাখো</p></div><button class="secondary" id="reportCsv">রিপোর্ট CSV</button></div><textarea id="monthReflection" placeholder="এই মাসে কী ভালো হয়েছে? কী উন্নতি দরকার?" rows="4"></textarea><button class="primary top-gap" id="saveReflection">রিভিউ সেভ</button><p id="reflectionMsg" class="message"></p></article>
+</section>
+
+<section class="page" id="risk">
+ <div class="section-head"><div><h2>অ্যাডভান্সড রিস্ক ক্যালকুলেটর</h2><p>শুধু কাল্পনিক অনুশীলনের হিসাব; বাস্তব ট্রেডের নির্দেশনা নয়।</p></div></div>
+ <div class="risk-layout"><article class="panel"><div class="panel-head"><div><h3>কাল্পনিক সেটিংস</h3><p>উদাহরণ হিসেবে মান পরিবর্তন করো</p></div></div><div class="form-grid">
+ <label>সিমুলেটেড ব্যালেন্স<input type="number" id="riskBalance" value="10000" min="0" step="any"></label>
+ <label>প্রতি ট্রেড ঝুঁকি (%)<input type="number" id="riskPercent" value="0.5" min="0" max="100" step="any"></label>
+ <label>Entry মূল্য<input type="number" id="riskEntry" value="100" step="any"></label>
+ <label>Stop মূল্য<input type="number" id="riskStop" value="98" step="any"></label>
+ <label>Target মূল্য<input type="number" id="riskTarget" value="104" step="any"></label>
+ <label>প্রতি ইউনিটের কন্ট্রাক্ট/পয়েন্ট ভ্যালু<input type="number" id="riskValue" value="1" min="0" step="any"></label>
+ </div><p class="hint">বিভিন্ন মার্কেট/কন্ট্রাক্টে point value আলাদা হতে পারে। বাস্তব প্ল্যাটফর্মের specification যাচাই ছাড়া এই ফল ব্যবহার করা যাবে না।</p></article>
+ <article class="panel result-panel"><h3>হিসাবের ফল</h3><div class="result-line"><span>কাল্পনিক সর্বোচ্চ ক্ষতি</span><b id="riskCash">0.00</b></div><div class="result-line"><span>প্রতি ইউনিট ঝুঁকি</span><b id="riskUnit">0.00</b></div><div class="result-line"><span>সিমুলেটেড পরিমাণ</span><b id="riskQty">0.00</b></div><div class="result-line"><span>সম্ভাব্য Reward / Risk</span><b id="riskRR">0.00 : 1</b></div><div class="notice">এই ক্যালকুলেটর শিক্ষামূলক। ফি, স্প্রেড, স্লিপেজ, লিভারেজ ও অন্যান্য ঝুঁকি এতে সম্পূর্ণ অন্তর্ভুক্ত নয়।</div></article></div>
+</section>
+
+<section class="page" id="journal">
+ <div class="section-head"><div><h2>দৈনিক জার্নাল</h2><p>প্রস্তুতি, মনোভাব ও শেখার নোট রাখো।</p></div></div>
+ <article class="panel journal-panel"><form id="journalForm"><label>তারিখ<input type="date" id="journalDate" required></label><label>মার্কেট কনটেক্সট<textarea id="journalContext" rows="2"></textarea></label><label>সেরা সিদ্ধান্ত<textarea id="journalBest" rows="2"></textarea></label><label>ভুল ও শেখার বিষয়<textarea id="journalMistake" rows="2"></textarea></label><label>আগামী দিনের ফোকাস<textarea id="journalFocus" rows="2"></textarea></label><button class="primary">জার্নাল সেভ করো</button><span id="journalMessage" class="message"></span></form></article>
+ <article class="panel"><div class="panel-head"><h3>আগের নোট</h3></div><div id="journalRows" class="journal-list"><p class="empty">কোনো নোট নেই।</p></div></article>
+</section>
+<footer>© TradeLedger Pro <span>Paper trading • Review • Improve</span></footer>
+</main>
+</div>
+
+<dialog id="tradeDialog"><form id="tradeForm" class="modal" method="dialog">
+ <div class="modal-head"><div><div class="eyebrow">PAPER TRADE ENTRY</div><h2>নতুন ট্রেড সংরক্ষণ</h2></div><button type="button" class="icon-btn" id="closeDialog">×</button></div>
+ <div class="form-grid">
+ <label>তারিখ<input id="tDate" type="date" required></label><label>সিম্বল<input id="tSymbol" placeholder="যেমন: EURUSD" required></label>
+ <label>সেশন<select id="tSession"><option>Asia</option><option>London</option><option>New York</option><option>Other</option></select></label><label>দিক<select id="tSide"><option>Long</option><option>Short</option></select></label>
+ <label>স্ট্র্যাটেজি / সেটআপ<input id="tStrategy" placeholder="যেমন: Breakout" required></label><label>টাইমফ্রেম<select id="tTime"><option>1m</option><option>5m</option><option>15m</option><option>1H</option><option>4H</option><option>1D</option></select></label>
+ <label>Entry<input id="tEntry" type="number" step="any" required></label><label>Stop Loss<input id="tStop" type="number" step="any" required></label>
+ <label>Exit<input id="tExit" type="number" step="any" required></label><label>Quantity (sim.)<input id="tQty" type="number" step="any" min="0" required></label>
+ <label>Fees<input id="tFees" type="number" step="any" min="0" value="0"></label><label>Plan Followed?<select id="tFollow"><option>Yes</option><option>Partly</option><option>No</option></select></label>
+ <label class="full-col">ট্রেডের নোট<textarea id="tNotes" rows="2"></textarea></label>
+ <label class="full-col">চার্টের স্ক্রিনশট (ঐচ্ছিক)<input id="tScreenshot" type="file" accept="image/png,image/jpeg,image/webp"></label>
+ </div><div class="modal-actions"><button type="button" class="secondary" id="cancelDialog">বাতিল</button><button class="primary" id="saveTrade">সেভ করো</button></div><p class="hint">শুধু নিজের তৈরি/ব্যবহারের অনুমতি থাকা স্ক্রিনশট আপলোড করো।</p>
+</form></dialog>
+<script src="config.js"></script><script src="app.js"></script>
+</body></html>
